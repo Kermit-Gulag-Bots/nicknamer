@@ -1,4 +1,5 @@
 import os
+import sys
 
 # noinspection PyPackageRequirements
 from discord import Member, Client
@@ -11,6 +12,7 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 
 if not TOKEN:
     print("Error, no discord token provided, please set environment variable named 'DISCORD_TOKEN'")
+    sys.exit(1)
 
 client = Client()
 nicknamer = Bot(command_prefix="!")
