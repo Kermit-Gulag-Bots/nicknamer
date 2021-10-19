@@ -7,7 +7,7 @@ from discord.ext.commands import Context, Bot
 
 from keep_alive import keep_alive
 
-TOKEN = os.getenv("DISCORD_TOKEN", None)
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 if not TOKEN:
     print("Error, no discord token provided, please set environment variable named 'DISCORD_TOKEN'")
