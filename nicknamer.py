@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Optional
+from typing import Optional, Tuple, List
 
 import yaml
 
@@ -57,6 +57,34 @@ async def nick(context: Context, member: Member, new_nickname: str) -> None:
     await context.send(f"Changed {member}'s nickname from '{original_nickname}' to '{new_nickname}'")
 
 
+def get_role_to_alert(context: Context) -> Role:
+    role_to_mention: Role = context.guild.default_role
+
+    for role in context.guild.roles:
+        if role.name == CODE_MONKEYS_ROLE_NAME:
+            role_to_mention = role
+            break
+
+    return role_to_mention
+
+
+def process_channel_names(context: Context) -> Tuple[List[str], List[str]]:
+    name_explanations = []
+    unrecognized_names = []
+    for member in context.channel.members:
+        if not member.bot and member.id != context.guild.owner_id:
+            if member.id in REAL_NAMES:
+                name_explanations.append(
+                    NAME_EXPLANATION_TEMPLATE.format(
+                        display_name=member.display_name,
+                        real_name=REAL_NAMES[member.id],
+                    )
+                )
+            else:
+                unrecognized_names.append(f"{str(member)} aka {member.display_name}")
+    return name_explanations, unrecognized_names
+
+
 @nicknamer.command(name="reveal")
 async def reveal(context: Context, specific_member: Optional[Member]) -> None:
     """Routing responsible for 'reveal' discord command.
@@ -87,22 +115,7 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
                 )
             )
     else:
-        name_explanations = []
-        unrecognized_names = []
-
-        for member in context.channel.members:
-            if not member.bot and member.id != context.guild.owner_id:
-                if member.id in REAL_NAMES:
-                    name_explanations.append(
-                        NAME_EXPLANATION_TEMPLATE.format(
-                            display_name=member.display_name,
-                            real_name=REAL_NAMES[member.id],
-                        )
-                    )
-                else:
-                    unrecognized_names.append(
-                        f"{str(member)} aka {member.display_name}"
-                    )
+        name_explanations, unrecognized_names = process_channel_names(context)
 
         if name_explanations:
             name_explanations_str = "\n\t".join(name_explanations)
@@ -112,12 +125,7 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
             )
 
         if unrecognized_names:
-            role_to_mention: Role = context.guild.default_role
-
-            for role in context.guild.roles:
-                if role.name == CODE_MONKEYS_ROLE_NAME:
-                    role_to_mention = role
-                    break
+            role_to_mention = get_role_to_alert(context)
 
             unrecognized_names_str = "\n\t".join(unrecognized_names)
 
