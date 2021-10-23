@@ -2,29 +2,21 @@ import os
 import sys
 from typing import Optional, Tuple, List
 
-import yaml
-
 # noinspection PyPackageRequirements
 from discord import Member, Intents, Role
-
 # noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
 
 from keep_alive import keep_alive
+from util import read_yaml
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-REAL_NAMES_FILEPATH = os.path.join(ROOT_DIR, "real_names.yaml")
 NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
 REVEAL_INSULT = "ya dingus"
 CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
 
-with open(REAL_NAMES_FILEPATH, "r") as f:
-    try:
-        REAL_NAMES = yaml.safe_load(f)
-    except yaml.YAMLError as e:
-        print(f"Failed to load real names config:\n{e}")
-        sys.exit(1)
+REAL_NAMES = read_yaml(os.path.join(ROOT_DIR, "real_names.yaml"))
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -57,7 +49,7 @@ async def nick(context: Context, member: Member, new_nickname: str) -> None:
     await context.send(f"Changed {member}'s nickname from '{original_nickname}' to '{new_nickname}'")
 
 
-def get_role_to_alert(context: Context) -> Role:
+def _get_role_to_alert(context: Context) -> Role:
     role_to_mention: Role = context.guild.default_role
 
     for role in context.guild.roles:
@@ -68,9 +60,10 @@ def get_role_to_alert(context: Context) -> Role:
     return role_to_mention
 
 
-def process_channel_names(context: Context) -> Tuple[List[str], List[str]]:
+def _process_channel_names(context: Context) -> Tuple[List[str], List[str]]:
     name_explanations = []
     unrecognized_names = []
+
     for member in context.channel.members:
         if not member.bot and member.id != context.guild.owner_id:
             if member.id in REAL_NAMES:
@@ -81,7 +74,8 @@ def process_channel_names(context: Context) -> Tuple[List[str], List[str]]:
                     )
                 )
             else:
-                unrecognized_names.append(f"{str(member)} aka {member.display_name}")
+                unrecognized_names.append(f"{member} aka {member.display_name}")
+
     return name_explanations, unrecognized_names
 
 
@@ -115,7 +109,7 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
                 )
             )
     else:
-        name_explanations, unrecognized_names = process_channel_names(context)
+        name_explanations, unrecognized_names = _process_channel_names(context)
 
         if name_explanations:
             name_explanations_str = "\n\t".join(name_explanations)
@@ -125,7 +119,7 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
             )
 
         if unrecognized_names:
-            role_to_mention = get_role_to_alert(context)
+            role_to_mention = _get_role_to_alert(context)
 
             unrecognized_names_str = "\n\t".join(unrecognized_names)
 
