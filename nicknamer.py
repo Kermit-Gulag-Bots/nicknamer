@@ -4,6 +4,7 @@ from typing import Optional, Tuple, List
 
 # noinspection PyPackageRequirements
 from discord import Member, Intents, Role, Forbidden, HTTPException
+
 # noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
 
@@ -18,8 +19,6 @@ CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
 
 REAL_NAMES = read_yaml(os.path.join(ROOT_DIR, "real_names.yaml"))
 
-CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
-
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 if not TOKEN:
@@ -33,6 +32,17 @@ intents: Intents = Intents.default()
 # noinspection PyDunderSlots,PyUnresolvedReferences
 intents.members = True
 nicknamer = Bot(command_prefix="!", intents=intents)
+
+
+def _get_role_to_alert(context: Context) -> Role:
+    role_to_mention: Role = context.guild.default_role
+
+    for role in context.guild.roles:
+        if role.name == CODE_MONKEYS_ROLE_NAME:
+            role_to_mention = role
+            break
+
+    return role_to_mention
 
 
 @nicknamer.command(name="nick")
@@ -64,34 +74,16 @@ async def nick(context: Context, member: Member, new_nickname: str) -> None:
                 "impudence!"
             )
         else:
-            role_to_mention = context.guild.default_role
-
-            for role in context.guild.roles:
-                if role.name == CODE_MONKEYS_ROLE_NAME:
-                    role_to_mention = role
-                    break
-
             response = (
-                f"Some devilry restricts my power, {role_to_mention.mention} please "
-                f"investigate the rogue {member.mention}:\n```{e}```"
+                "Some devilry restricts my power, "
+                f"{_get_role_to_alert(context).mention} please investigate the rogue "
+                f"{member.mention}:\n```{e}```"
             )
     except HTTPException as e:
         formatted_exception_text = e.text.replace("\n", "\n\t")
         response = f"You fool, you messed it up:\n\t{formatted_exception_text}"
 
     await context.reply(response)
-
-
-
-def _get_role_to_alert(context: Context) -> Role:
-    role_to_mention: Role = context.guild.default_role
-
-    for role in context.guild.roles:
-        if role.name == CODE_MONKEYS_ROLE_NAME:
-            role_to_mention = role
-            break
-
-    return role_to_mention
 
 
 def _process_channel_names(context: Context) -> Tuple[List[str], List[str]]:
