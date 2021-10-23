@@ -3,7 +3,7 @@ import sys
 from typing import Optional, Tuple, List
 
 # noinspection PyPackageRequirements
-from discord import Member, Intents, Role
+from discord import Member, Intents, Role, Forbidden, HTTPException
 # noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
 
@@ -18,10 +18,15 @@ CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
 
 REAL_NAMES = read_yaml(os.path.join(ROOT_DIR, "real_names.yaml"))
 
+CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 if not TOKEN:
-    print("Error, no discord token provided, please set environment variable named 'DISCORD_TOKEN'")
+    print(
+        "Error, no discord token provided, please set environment variable named"
+        "'DISCORD_TOKEN'"
+    )
     sys.exit(1)
 
 intents: Intents = Intents.default()
@@ -34,19 +39,48 @@ nicknamer = Bot(command_prefix="!", intents=intents)
 async def nick(context: Context, member: Member, new_nickname: str) -> None:
     """Routine responsible for 'nick' discord command.
 
-    This function handles the 'nick' command for the `nicknamer` bot. Its purpose is to allow discord users to manage
-    each other's nicknames, even if they are in the same Discord Role. The bot applies any nickname changes as specified
-    by this command. This command assumes that the bot has a higher Role than all users which invoke this command.
+    This function handles the 'nick' command for the `nicknamer` bot. Its purpose is to
+    allow discord users to manage each other's nicknames, even if they are in the same
+    Discord Role. The bot applies any nickname changes as specified by this command.
+    This command assumes that the bot has a higher Role than all users which invoke this
+    command.
+
+    In certain failure scenarios, such as offering an invalid nickname, the bot will
+    reply with information about the invalid command.
 
     Args:
         context: The discord `Context` from which the command was invoked
         member: Member whose nickname should be changed
         new_nickname: New nickname which should be applied to `member`
     """
-    original_nickname = member.nick
+    response = f"Changed {member}'s nickname from '{member.nick}' to '{new_nickname}'"
 
-    await member.edit(nick=new_nickname)
-    await context.send(f"Changed {member}'s nickname from '{original_nickname}' to '{new_nickname}'")
+    try:
+        await member.edit(nick=new_nickname)
+    except Forbidden as e:
+        if member.id == context.guild.owner_id:
+            response = (
+                "You dare to rename our great General Secretary??? Away with your "
+                "impudence!"
+            )
+        else:
+            role_to_mention = context.guild.default_role
+
+            for role in context.guild.roles:
+                if role.name == CODE_MONKEYS_ROLE_NAME:
+                    role_to_mention = role
+                    break
+
+            response = (
+                f"Some devilry restricts my power, {role_to_mention.mention} please "
+                f"investigate the rogue {member.mention}:\n```{e}```"
+            )
+    except HTTPException as e:
+        formatted_exception_text = e.text.replace("\n", "\n\t")
+        response = f"You fool, you messed it up:\n\t{formatted_exception_text}"
+
+    await context.reply(response)
+
 
 
 def _get_role_to_alert(context: Context) -> Role:
