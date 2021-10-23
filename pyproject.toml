@@ -6,10 +6,10 @@ authors = ["AndCook <acmagee@gmail.com>", "dusvuc <dusanvucvr@gmail.com>"]
 license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-"discord.py" = "^1.7.3"
-"Flask" = "^2.0.2"
-"PyYAML" = "^6.0"
+python = "3.8"
+"discord.py" = "1.7.3"
+"Flask" = "2.0.2"
+"PyYAML" = "6.0"
 
 [tool.poetry.dev-dependencies]
 
