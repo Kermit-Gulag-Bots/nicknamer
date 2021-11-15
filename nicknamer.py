@@ -46,7 +46,7 @@ def _get_role_to_alert(context: Context) -> Role:
 
 
 @nicknamer.command(name="nick")
-async def nick(context: Context, member: Member, new_nickname: str) -> None:
+async def nick(context: Context, member: Member, *new_nickname_input: str) -> None:
     """Routine responsible for 'nick' discord command.
 
     This function handles the 'nick' command for the `nicknamer` bot. Its purpose is to
@@ -61,8 +61,12 @@ async def nick(context: Context, member: Member, new_nickname: str) -> None:
     Args:
         context: The discord `Context` from which the command was invoked
         member: Member whose nickname should be changed
-        new_nickname: New nickname which should be applied to `member`
+        new_nickname_input: New nickname which should be applied to `member`, may be
+                            list of strings, which will be joined to form a single
+                            string nickname
     """
+    new_nickname: str = " ".join(new_nickname_input)
+
     response = f"Changed {member}'s nickname from '{member.nick}' to '{new_nickname}'"
 
     try:
