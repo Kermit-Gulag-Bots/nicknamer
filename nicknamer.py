@@ -160,5 +160,21 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
             )
 
 
+@nicknamer.command(name="trace")
+async def test(context: Context) -> None:
+    if (
+        context.message.reference is None
+        or context.message.reference.resolved.reference is None
+    ):
+        await context.reply(
+            "C'mon Jack, what do you want me to do here?? There ain't nothin' thar!"
+        )
+    else:
+        await context.reply(
+            "Here's a link for the message that cannot load for some dumb reason: "
+            f"{context.message.reference.resolved.reference.jump_url}"
+        )
+
+
 keep_alive()
 nicknamer.run(TOKEN)
