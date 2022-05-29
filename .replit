@@ -1,2 +1,0 @@
-language = "python3.8"
-run = "python nicknamer.py"
