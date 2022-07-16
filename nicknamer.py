@@ -8,7 +8,6 @@ from discord import Member, Intents, Role, Forbidden, HTTPException
 # noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
 
-from keep_alive import keep_alive
 from util import read_yaml
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -161,7 +160,7 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
 
 
 @nicknamer.command(name="trace")
-async def test(context: Context) -> None:
+async def trace(context: Context) -> None:
     if (
         context.message.reference is None
         or context.message.reference.resolved.reference is None
@@ -176,5 +175,4 @@ async def test(context: Context) -> None:
         )
 
 
-keep_alive()
 nicknamer.run(TOKEN)
