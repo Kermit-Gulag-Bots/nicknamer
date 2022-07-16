@@ -11,4 +11,4 @@ RUN poetry install -n --no-root --no-dev
 COPY *.py /app/
 COPY real_names.yaml /app/
 
-RUN poetry run python nicknamer.py
+ENTRYPOINT poetry run python nicknamer.py
