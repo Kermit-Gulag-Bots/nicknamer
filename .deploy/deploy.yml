@@ -16,4 +16,7 @@ spec:
     spec:
       containers:
       - name: nicknamer
-        image: nicknamer:initial
+        image: nicknamer:initial # note: in practice this must be changed to full cloud path
+        envFrom:
+        - secretRef:
+            name: nicknamer-discord-token
