@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nicknamer-deployment
+  labels:
+    app: nicknamer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nicknamer
+  template:
+    metadata:
+      labels:
+        app: nicknamer
+    spec:
+      containers:
+      - name: nicknamer
+        image: nicknamer:initial # note: in practice this must be changed to full cloud path
+        envFrom:
+        - secretRef:
+            name: nicknamer-discord-token
