@@ -1,9 +1,13 @@
 import os
 import sys
+import re
 from typing import Optional, Tuple, List
 
+from unalix import clear_url
+from urlextract import URLExtract
+
 # noinspection PyPackageRequirements
-from discord import Member, Intents, Role, Forbidden, HTTPException
+from discord import Member, Intents, Role, Forbidden, HTTPException, Message
 
 # noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
@@ -15,6 +19,7 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
 REVEAL_INSULT = "ya dingus"
 CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
+URL_LENGTH_VIOLATION_FACTOR = 2
 
 REAL_NAMES = read_yaml(os.path.join(ROOT_DIR, "real_names.yaml"))
 
@@ -27,9 +32,7 @@ if not TOKEN:
     )
     sys.exit(1)
 
-intents: Intents = Intents.default()
-# noinspection PyDunderSlots,PyUnresolvedReferences
-intents.members = True
+intents: Intents = Intents.all()
 nicknamer = Bot(command_prefix="!", intents=intents)
 
 
@@ -173,6 +176,33 @@ async def trace(context: Context) -> None:
             "Here's a link for the message that cannot load for some dumb reason: "
             f"{context.message.reference.resolved.reference.jump_url}"
         )
+
+
+@nicknamer.event
+async def on_message(message: Message) -> None:
+    extractor = URLExtract()
+
+    cleaned_urls = {}
+    take_counter_measures = False
+
+    for url in extractor.gen_urls(message.content):
+        clean_url = clear_url(url)
+
+        if url != clean_url:
+            cleaned_urls[url] = clean_url
+
+        take_counter_measures = take_counter_measures or len(clean_url) * URL_LENGTH_VIOLATION_FACTOR < len(url)
+
+    if take_counter_measures:
+        # TODO: Change to jar jar or some other emoji for non-Zach folks
+        sicko_emoji = await message.channel.guild.fetch_emoji(1022222678947528704)
+        await message.add_reaction(sicko_emoji)
+
+        pattern = "|".join(re.escape(orig_url) for orig_url in cleaned_urls)
+        cleaned_content = re.sub(pattern, lambda m: cleaned_urls[m.group(0)], message.content)
+
+        await message.reply(f">>> {cleaned_content}")
+        await message.delete(delay=10.0)
 
 
 nicknamer.run(TOKEN)
