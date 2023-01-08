@@ -181,28 +181,11 @@ async def trace(context: Context) -> None:
 
 @nicknamer.event
 async def on_message(message: Message) -> None:
-    extractor = URLExtract()
-
-    context: Context = await nicknamer.get_context(message)
-    #
-    # bot_user: ClientUser = nicknamer.user
-    #
-    # "ExQUEEEZE me, yousa makee litty bitty accidenty. Dism bomb-bad!! Icky icky linky."
-    # "Lookie Lookie <name>! Meesa makee allllll cwean up! Muy muy"
-    #
-    # "Good heavens! Ex-cuse me Master <name>, but your messages is quite long indeed. Oh, well, I guess I will have to clean this up."
-    #
-    # context.send()
-    #
-    # bot_avatar: Asset = bot_user.avatar
-    # bot_display_avatar: Asset = bot_user.display_avatar
-    #
-    #
-    # bot_user.edit()
-
-    take_counter_measures = False
     cleaned_urls = {}
 
+    take_counter_measures = False
+
+    extractor = URLExtract()
     for url in extractor.gen_urls(message.content):
         clean_url = clear_url(url)
 
@@ -211,8 +194,8 @@ async def on_message(message: Message) -> None:
 
         take_counter_measures = take_counter_measures or len(clean_url) * URL_LENGTH_VIOLATION_FACTOR < len(url)
 
-    if take_counter_measures:
-        # TODO: Change to jar jar or some other emoji for non-Zach folks
+    if take_counter_measures and message.author.id == 894692357457469471:
+        # TODO: Change to jar jar
         sicko_emoji = await message.channel.guild.fetch_emoji(1022222678947528704)
         await message.add_reaction(sicko_emoji)
 
