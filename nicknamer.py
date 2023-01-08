@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 import re
@@ -7,7 +8,7 @@ from unalix import clear_url
 from urlextract import URLExtract
 
 # noinspection PyPackageRequirements
-from discord import Member, Intents, Role, Forbidden, HTTPException, Message
+from discord import Member, Intents, Role, Forbidden, HTTPException, Message, ClientUser, Asset, Embed, AllowedMentions
 
 # noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
@@ -182,8 +183,25 @@ async def trace(context: Context) -> None:
 async def on_message(message: Message) -> None:
     extractor = URLExtract()
 
-    cleaned_urls = {}
+    context: Context = await nicknamer.get_context(message)
+    #
+    # bot_user: ClientUser = nicknamer.user
+    #
+    # "ExQUEEEZE me, yousa makee litty bitty accidenty. Dism bomb-bad!! Icky icky linky."
+    # "Lookie Lookie <name>! Meesa makee allllll cwean up! Muy muy"
+    #
+    # "Good heavens! Ex-cuse me Master <name>, but your messages is quite long indeed. Oh, well, I guess I will have to clean this up."
+    #
+    # context.send()
+    #
+    # bot_avatar: Asset = bot_user.avatar
+    # bot_display_avatar: Asset = bot_user.display_avatar
+    #
+    #
+    # bot_user.edit()
+
     take_counter_measures = False
+    cleaned_urls = {}
 
     for url in extractor.gen_urls(message.content):
         clean_url = clear_url(url)
@@ -198,10 +216,34 @@ async def on_message(message: Message) -> None:
         sicko_emoji = await message.channel.guild.fetch_emoji(1022222678947528704)
         await message.add_reaction(sicko_emoji)
 
+        await asyncio.sleep(.2)
+
+        jar_jar_embed = Embed(title="Jar Jar Link Countermeasures",
+                              description="Icky icky linky")
+        jar_jar_embed.set_thumbnail(url="https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp")
+
+        await message.reply(content=f"ExQUEEEZE me {message.author.mention}, yousa makee litty bitty accidenty. Dism bomb-bad!!", embed=jar_jar_embed)
+
         pattern = "|".join(re.escape(orig_url) for orig_url in cleaned_urls)
         cleaned_content = re.sub(pattern, lambda m: cleaned_urls[m.group(0)], message.content)
 
-        await message.reply(f">>> {cleaned_content}")
+        jar_jar_embed = Embed(title="Jar Jar Link Countermeasures", description=f"Lookie Lookie {REAL_NAMES[message.author.id]}! Meesa makee allllll cwean up! Muy muy.")
+        jar_jar_embed.set_thumbnail(url="https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest")
+
+        reply_embeds = []
+
+        for embed in message.embeds:
+            if embed.url in cleaned_urls:
+                embed_dict = embed.to_dict()
+                embed_dict["url"] = cleaned_urls[embed.url]
+
+                reply_embeds.append(Embed.from_dict(embed_dict))
+
+        reply_embeds.append(jar_jar_embed)
+
+        await asyncio.sleep(10)
+
+        await message.reply(f"{message.author.mention}'s original message:\n>>> {cleaned_content}", embeds=reply_embeds)
         await message.delete(delay=10.0)
 
 
