@@ -194,8 +194,8 @@ async def on_message(message: Message) -> None:
             clean_url) * URL_LENGTH_VIOLATION_FACTOR < len(url)
 
     if cleaned_urls:
-        sicko_emoji = await message.channel.guild.fetch_emoji(1061775549065855079)
-        await message.add_reaction(sicko_emoji)
+        jar_jar_emoji = await message.channel.guild.fetch_emoji(1061775549065855079)
+        await message.add_reaction(jar_jar_emoji)
 
         if take_extreme_counter_measures and message.author.id == 894692357457469471:
             await asyncio.sleep(.2)
