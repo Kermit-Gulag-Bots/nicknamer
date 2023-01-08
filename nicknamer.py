@@ -181,7 +181,7 @@ async def trace(context: Context) -> None:
 async def on_message(message: Message) -> None:
     cleaned_urls = {}
 
-    take_counter_measures, take_extreme_counter_measures = False, False
+    take_extreme_counter_measures = False
 
     extractor = URLExtract()
     for url in extractor.gen_urls(message.content):
@@ -190,11 +190,10 @@ async def on_message(message: Message) -> None:
         if url != clean_url:
             cleaned_urls[url] = clean_url
 
-        take_counter_measures = take_counter_measures or len(clean_url) < len(url)
         take_extreme_counter_measures = take_extreme_counter_measures or len(
             clean_url) * URL_LENGTH_VIOLATION_FACTOR < len(url)
 
-    if take_counter_measures:
+    if cleaned_urls:
         sicko_emoji = await message.channel.guild.fetch_emoji(1061775549065855079)
         await message.add_reaction(sicko_emoji)
 
