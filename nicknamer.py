@@ -19,6 +19,9 @@ NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
 REVEAL_INSULT = "ya dingus"
 CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
 URL_LENGTH_VIOLATION_FACTOR = 2
+JAR_JAR_EMOJI_ID = 1061775549065855079
+ZACH_USER_ID = 894692357457469471
+JAR_JAR_COLOR_HEX = 0xd59d7e
 
 REAL_NAMES = read_yaml(os.path.join(ROOT_DIR, "real_names.yaml"))
 
@@ -194,14 +197,14 @@ async def on_message(message: Message) -> None:
             clean_url) * URL_LENGTH_VIOLATION_FACTOR < len(url)
 
     if cleaned_urls:
-        jar_jar_emoji = await message.channel.guild.fetch_emoji(1061775549065855079)
+        jar_jar_emoji = await message.channel.guild.fetch_emoji(JAR_JAR_EMOJI_ID)
         await message.add_reaction(jar_jar_emoji)
 
-        if take_extreme_counter_measures and message.author.id == 894692357457469471:
+        if take_extreme_counter_measures and message.author.id == ZACH_USER_ID:
             await asyncio.sleep(.2)
 
             jar_jar_embed = Embed(title="Jar Jar Link Countermeasures",
-                                  description="Icky icky linky", color=0xd59d7e)
+                                  description="Icky icky linky", color=JAR_JAR_COLOR_HEX)
             jar_jar_embed.set_thumbnail(url="https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp")
 
             await message.reply(
@@ -215,7 +218,7 @@ async def on_message(message: Message) -> None:
                                   description=(f"Lookie Lookie {REAL_NAMES[message.author.id]}! Meesa makee allllll "
                                                "cwean up! Muy muy."),
 
-                                  color=0xd59d7e)
+                                  color=JAR_JAR_COLOR_HEX)
             jar_jar_embed.set_thumbnail(
                 url="https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest")
 
