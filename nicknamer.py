@@ -1,12 +1,15 @@
+import asyncio
 import os
+import re
 import sys
 from typing import Optional, Tuple, List
 
 # noinspection PyPackageRequirements
-from discord import Member, Intents, Role, Forbidden, HTTPException
-
+from discord import Member, Intents, Role, Forbidden, HTTPException, Message, Embed
 # noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
+from unalix import clear_url
+from urlextract import URLExtract
 
 from util import read_yaml
 
@@ -15,6 +18,10 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
 REVEAL_INSULT = "ya dingus"
 CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
+URL_LENGTH_VIOLATION_FACTOR = 2
+JAR_JAR_EMOJI_ID = 1061775549065855079
+ZACH_USER_ID = 894692357457469471
+JAR_JAR_COLOR_HEX = 0xd59d7e
 
 REAL_NAMES = read_yaml(os.path.join(ROOT_DIR, "real_names.yaml"))
 
@@ -27,9 +34,7 @@ if not TOKEN:
     )
     sys.exit(1)
 
-intents: Intents = Intents.default()
-# noinspection PyDunderSlots,PyUnresolvedReferences
-intents.members = True
+intents: Intents = Intents.all()
 nicknamer = Bot(command_prefix="!", intents=intents)
 
 
@@ -162,8 +167,8 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
 @nicknamer.command(name="trace")
 async def trace(context: Context) -> None:
     if (
-        context.message.reference is None
-        or context.message.reference.resolved.reference is None
+            context.message.reference is None
+            or context.message.reference.resolved.reference is None
     ):
         await context.reply(
             "C'mon Jack, what do you want me to do here?? There ain't nothin' thar!"
@@ -173,6 +178,66 @@ async def trace(context: Context) -> None:
             "Here's a link for the message that cannot load for some dumb reason: "
             f"{context.message.reference.resolved.reference.jump_url}"
         )
+
+
+@nicknamer.event
+async def on_message(message: Message) -> None:
+    cleaned_urls = {}
+
+    take_extreme_counter_measures = False
+
+    extractor = URLExtract()
+    for url in extractor.gen_urls(message.content):
+        clean_url = clear_url(url)
+
+        if url != clean_url:
+            cleaned_urls[url] = clean_url
+
+        take_extreme_counter_measures = take_extreme_counter_measures or len(
+            clean_url) * URL_LENGTH_VIOLATION_FACTOR < len(url)
+
+    if cleaned_urls:
+        jar_jar_emoji = await message.channel.guild.fetch_emoji(JAR_JAR_EMOJI_ID)
+        await message.add_reaction(jar_jar_emoji)
+
+        if take_extreme_counter_measures and message.author.id == ZACH_USER_ID:
+            await asyncio.sleep(.2)
+
+            jar_jar_embed = Embed(title="Jar Jar Link Countermeasures",
+                                  description="Icky icky linky", color=JAR_JAR_COLOR_HEX)
+            jar_jar_embed.set_thumbnail(url="https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp")
+
+            await message.reply(
+                content=f"ExQUEEEZE me {message.author.mention}, yousa makee litty bitty accidenty. Dism bomb-bad!!",
+                embed=jar_jar_embed)
+
+            pattern = "|".join(re.escape(orig_url) for orig_url in cleaned_urls)
+            cleaned_content = re.sub(pattern, lambda m: cleaned_urls[m.group(0)], message.content)
+
+            jar_jar_embed = Embed(title="Jar Jar Link Countermeasures",
+                                  description=(f"Lookie Lookie {REAL_NAMES[message.author.id]}! Meesa makee allllll "
+                                               "cwean up! Muy muy."),
+
+                                  color=JAR_JAR_COLOR_HEX)
+            jar_jar_embed.set_thumbnail(
+                url="https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest")
+
+            reply_embeds = []
+
+            for embed in message.embeds:
+                if embed.url in cleaned_urls:
+                    embed_dict = embed.to_dict()
+                    embed_dict["url"] = cleaned_urls[embed.url]
+
+                    reply_embeds.append(Embed.from_dict(embed_dict))
+
+            reply_embeds.append(jar_jar_embed)
+
+            await asyncio.sleep(10)
+
+            await message.reply(f"{message.author.mention}'s original message:\n>>> {cleaned_content}",
+                                embeds=reply_embeds)
+            await message.delete(delay=10.0)
 
 
 nicknamer.run(TOKEN)
