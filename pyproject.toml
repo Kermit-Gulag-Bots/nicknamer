@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "nicknamer"
-version = "1.1.0"
+version = "1.1.1"
 description = "Bot to facilitate nickname information management and viewing"
 authors = ["AndCook <acmagee@gmail.com>", "dusvuc <dusanvucvr@gmail.com>"]
 license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]
-python = "3.11.0"
+python = "3.11.1"
 "discord.py" = "^2.1.0"
 "PyYAML" = "^6.0"
 "unalix" = "^0.9"
