@@ -239,5 +239,7 @@ async def on_message(message: Message) -> None:
                                 embeds=reply_embeds)
             await message.delete(delay=10.0)
 
+    await nicknamer.process_commands(message)
+
 
 nicknamer.run(TOKEN)
