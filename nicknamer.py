@@ -200,7 +200,7 @@ async def on_message(message: Message) -> None:
         jar_jar_emoji = await message.channel.guild.fetch_emoji(JAR_JAR_EMOJI_ID)
         await message.add_reaction(jar_jar_emoji)
 
-        if take_extreme_counter_measures and """message.author.id == ZACH_USER_ID""":
+        if take_extreme_counter_measures and message.author.id == ZACH_USER_ID:
             await asyncio.sleep(.2)
 
             jar_jar_embed = Embed(title="Jar Jar Link Countermeasures",
