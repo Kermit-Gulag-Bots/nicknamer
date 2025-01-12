@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.12
+
 import asyncio
 import os
 import re
