@@ -3,6 +3,7 @@
 import asyncio
 import os
 import re
+import socket
 import sys
 from typing import Optional, Tuple, List
 
@@ -180,6 +181,19 @@ async def trace(context: Context) -> None:
             "Here's a link for the message that cannot load for some dumb reason: "
             f"{context.message.reference.resolved.reference.jump_url}"
         )
+
+
+@nicknamer.command(name="ping")
+async def ping(context: Context) -> None:
+    """Ping command to test bot availability
+
+    Any instance of bot connected to the server will respond with "Pong!" and some
+    runtime information.
+
+    Args:
+        context: The discord `Context` from which the command was invoked
+    """
+    await context.reply(f"`<{socket.gethostname()}>` Pong!")
 
 
 @nicknamer.event
