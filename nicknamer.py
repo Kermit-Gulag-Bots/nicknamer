@@ -7,9 +7,7 @@ import socket
 import sys
 from typing import Optional, Tuple, List
 
-# noinspection PyPackageRequirements
 from discord import Member, Intents, Role, Forbidden, HTTPException, Message, Embed
-# noinspection PyPackageRequirements
 from discord.ext.commands import Context, Bot
 from unalix import clear_url
 from urlextract import URLExtract
@@ -24,7 +22,11 @@ CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
 URL_LENGTH_VIOLATION_FACTOR = 2
 JAR_JAR_EMOJI_ID = 1061775549065855079
 ZACH_USER_ID = 894692357457469471
-JAR_JAR_COLOR_HEX = 0xd59d7e
+JAR_JAR_COLOR_HEX = 0xD59D7E
+HORRIFIED_JAR_JAR_PIC = (
+    "https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp"
+)
+HAPPY_JAR_JAR_PIC = "https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest"
 
 REAL_NAMES = read_yaml(os.path.join(ROOT_DIR, "real_names.yaml"))
 
@@ -170,8 +172,8 @@ async def reveal(context: Context, specific_member: Optional[Member]) -> None:
 @nicknamer.command(name="trace")
 async def trace(context: Context) -> None:
     if (
-            context.message.reference is None
-            or context.message.reference.resolved.reference is None
+        context.message.reference is None
+        or context.message.reference.resolved.reference is None
     ):
         await context.reply(
             "C'mon Jack, what do you want me to do here?? There ain't nothin' thar!"
@@ -210,33 +212,45 @@ async def on_message(message: Message) -> None:
             cleaned_urls[url] = clean_url
 
         take_extreme_counter_measures = take_extreme_counter_measures or len(
-            clean_url) * URL_LENGTH_VIOLATION_FACTOR < len(url)
+            clean_url
+        ) * URL_LENGTH_VIOLATION_FACTOR < len(url)
 
     if cleaned_urls and take_extreme_counter_measures:
         jar_jar_emoji = await message.channel.guild.fetch_emoji(JAR_JAR_EMOJI_ID)
         await message.add_reaction(jar_jar_emoji)
 
         if message.author.id == ZACH_USER_ID:
-            await asyncio.sleep(.2)
+            await asyncio.sleep(0.2)
 
-            jar_jar_embed = Embed(title="Jar Jar Link Countermeasures",
-                                  description="Icky icky linky", color=JAR_JAR_COLOR_HEX)
-            jar_jar_embed.set_thumbnail(url="https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp")
+            jar_jar_embed = Embed(
+                title="Jar Jar Link Countermeasures",
+                description="Icky icky linky",
+                color=JAR_JAR_COLOR_HEX,
+            )
+            jar_jar_embed.set_thumbnail(url=HORRIFIED_JAR_JAR_PIC)
 
             await message.reply(
-                content=f"ExQUEEEZE me {message.author.mention}, yousa makee litty bitty accidenty. Dism bomb-bad!!",
-                embed=jar_jar_embed)
+                content=(
+                    f"ExQUEEEZE me {message.author.mention}, yousa makee litty bitty "
+                    "accidenty. Dism bomb-bad!!"
+                ),
+                embed=jar_jar_embed,
+            )
 
             pattern = "|".join(re.escape(orig_url) for orig_url in cleaned_urls)
-            cleaned_content = re.sub(pattern, lambda m: cleaned_urls[m.group(0)], message.content)
+            cleaned_content = re.sub(
+                pattern, lambda m: cleaned_urls[m.group(0)], message.content
+            )
 
-            jar_jar_embed = Embed(title="Jar Jar Link Countermeasures",
-                                  description=(f"Lookie Lookie {REAL_NAMES[message.author.id]}! Meesa makee allllll "
-                                               "cwean up! Muy muy."),
-
-                                  color=JAR_JAR_COLOR_HEX)
-            jar_jar_embed.set_thumbnail(
-                url="https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest")
+            jar_jar_embed = Embed(
+                title="Jar Jar Link Countermeasures",
+                description=(
+                    f"Lookie Lookie {REAL_NAMES[message.author.id]}! Meesa makee "
+                    "allllll cwean up! Muy muy."
+                ),
+                color=JAR_JAR_COLOR_HEX,
+            )
+            jar_jar_embed.set_thumbnail(url=HAPPY_JAR_JAR_PIC)
 
             reply_embeds = []
 
@@ -251,8 +265,10 @@ async def on_message(message: Message) -> None:
 
             await asyncio.sleep(10)
 
-            await message.reply(f"{message.author.mention}'s original message:\n>>> {cleaned_content}",
-                                embeds=reply_embeds)
+            await message.reply(
+                f"{message.author.mention}'s original message:\n>>> {cleaned_content}",
+                embeds=reply_embeds,
+            )
             await message.delete(delay=10.0)
 
     await nicknamer.process_commands(message)
