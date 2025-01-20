@@ -21,3 +21,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 package-mode = false
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.0"
+dpytest = "^0.7.0"
