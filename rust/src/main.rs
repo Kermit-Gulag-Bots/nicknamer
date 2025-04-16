@@ -6,7 +6,7 @@ struct Data {} // User data, which is stored and accessible in all command invoc
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
-/// Ping command to test bot availability \
+/// Ping command to test bot availability
 /// Any instance of bot connected to the server will respond with "Pong!" and some \
 ///     runtime information.
 #[poise::command(prefix_command)]
