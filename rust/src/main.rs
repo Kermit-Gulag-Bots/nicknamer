@@ -16,13 +16,6 @@ async fn ping(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// Routine responsible for 'nick' discord command.
-///    This function handles the 'nick' command for the `nicknamer` bot. Its purpose is to \
-///     allow discord users to manage each other's nicknames, even if they are in the same \
-///     Discord Role. The bot applies any nickname changes as specified by this command. \
-///     This command assumes that the bot has a higher Role than all users which invoke this \
-///     command. \
-///     In certain failure scenarios, such as offering an invalid nickname, the bot will \
-///     reply with information about the invalid command.
 #[poise::command(prefix_command)]
 async fn nick(ctx: Context<'_>, member: serenity::Member) -> Result<(), Error> {
     nicknamer::nick(member.user.id);
