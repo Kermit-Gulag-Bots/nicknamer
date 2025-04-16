@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Check for updates to Cargo dependencies
+  - package-ecosystem: "cargo"
+    directory: "/rust"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    # Specify the target branch (same as your main branch)
+    target-branch: "main"
+
+  # Also keep GitHub Actions up to date
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    target-branch: "main"
