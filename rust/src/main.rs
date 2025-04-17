@@ -31,7 +31,7 @@ async fn main() {
         .options(poise::FrameworkOptions {
             commands: vec![],
             prefix_options: poise::PrefixFrameworkOptions {
-                prefix: Some("!".into()),
+                prefix: Some("~".into()),
                 ..Default::default()
             },
             ..Default::default()
