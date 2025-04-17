@@ -17,7 +17,7 @@ async fn ping(ctx: Context<'_>) -> Result<(), Error> {
 
 /// Routine responsible for 'nick' discord command.
 #[poise::command(prefix_command)]
-async fn nick(ctx: Context<'_>, member: serenity::Member) -> Result<(), Error> {
+async fn nick(_ctx: Context<'_>, member: serenity::Member) -> Result<(), Error> {
     nicknamer::nick(member.user.id);
     Ok(())
 }

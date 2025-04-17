@@ -9,4 +9,7 @@ mod config;
 ///     command. \
 ///     In certain failure scenarios, such as offering an invalid nickname, the bot will \
 ///     reply with information about the invalid command.
-pub fn nick(userId: UserId) {}
+#[allow(dead_code)]
+pub fn nick(_user_id: UserId) {
+    todo!()
+}
