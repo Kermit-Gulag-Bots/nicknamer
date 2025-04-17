@@ -4,6 +4,7 @@ use poise::serenity_prelude as serenity;
 
 struct Data {} // User data, which is stored and accessible in all command invocations
 type Error = Box<dyn std::error::Error + Send + Sync>;
+#[allow(dead_code)]
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 /// Ping command to test bot availability
