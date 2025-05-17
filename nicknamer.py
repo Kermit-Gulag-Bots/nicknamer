@@ -198,14 +198,51 @@ async def ping(context: Context) -> None:
     await context.reply(f"`<{socket.gethostname()}>` Pong!")
 
 
+@nicknamer.command(name="as")
+async def impersonate(context: Context, to_impersonate: str, *message_content: str) -> None:
+    """Command to impersonate another server member.
+
+    To a limited degree, causes the bot to interpret your identity as the provided
+    `to_impersonate` server member. This is a bit flaky and won't work in all cases;
+    particularly not for other commands.
+
+    Args:
+        context: The discord `Context` from which the command was invoked
+        to_impersonate: Name of the member being impersonated
+        *message_content: Message content to be interpreted as sent by impersonated
+                          member
+    """
+    member_to_impersonate: Optional[Member] = None
+
+    for member_id, name in REAL_NAMES.items():
+        if name == to_impersonate:
+            member_to_impersonate = await context.guild.fetch_member(member_id)
+
+    if member_to_impersonate:
+        await _handle_message(context.message, member_to_impersonate, " ".join(message_content))
+    else:
+        await context.reply(
+            f"I don't know who {to_impersonate} is, sorry. Please make sure you're "
+            "calling them as they are named in `reveal`"
+        )
+
+
+
 @nicknamer.event
 async def on_message(message: Message) -> None:
+    if not message.content.startswith("!as"):
+        await _handle_message(message, message.author, message.content)
+
+    await nicknamer.process_commands(message)
+
+
+async def _handle_message(message: Message, author: Member, content: str):
     cleaned_urls = {}
 
     take_extreme_counter_measures = False
 
     extractor = URLExtract()
-    for url in extractor.gen_urls(message.content):
+    for url in extractor.gen_urls(content):
         clean_url = clear_url(url)
 
         if url != clean_url:
@@ -219,7 +256,7 @@ async def on_message(message: Message) -> None:
         jar_jar_emoji = await message.channel.guild.fetch_emoji(JAR_JAR_EMOJI_ID)
         await message.add_reaction(jar_jar_emoji)
 
-        if message.author.id == ZACH_USER_ID:
+        if author.id == ZACH_USER_ID:
             await asyncio.sleep(0.2)
 
             jar_jar_embed = Embed(
@@ -231,7 +268,7 @@ async def on_message(message: Message) -> None:
 
             await message.reply(
                 content=(
-                    f"ExQUEEEZE me {message.author.mention}, yousa makee litty bitty "
+                    f"ExQUEEEZE me {author.mention}, yousa makee litty bitty "
                     "accidenty. Dism bomb-bad!!"
                 ),
                 embed=jar_jar_embed,
@@ -239,13 +276,13 @@ async def on_message(message: Message) -> None:
 
             pattern = "|".join(re.escape(orig_url) for orig_url in cleaned_urls)
             cleaned_content = re.sub(
-                pattern, lambda m: cleaned_urls[m.group(0)], message.content
+                pattern, lambda m: cleaned_urls[m.group(0)], content
             )
 
             jar_jar_embed = Embed(
                 title="Jar Jar Link Countermeasures",
                 description=(
-                    f"Lookie Lookie {REAL_NAMES[message.author.id]}! Meesa makee "
+                    f"Lookie Lookie {REAL_NAMES[author.id]}! Meesa makee "
                     "allllll cwean up! Muy muy."
                 ),
                 color=JAR_JAR_COLOR_HEX,
@@ -266,12 +303,10 @@ async def on_message(message: Message) -> None:
             await asyncio.sleep(10)
 
             await message.reply(
-                f"{message.author.mention}'s original message:\n>>> {cleaned_content}",
+                f"{author.mention}'s original message:\n>>> {cleaned_content}",
                 embeds=reply_embeds,
             )
             await message.delete(delay=10.0)
-
-    await nicknamer.process_commands(message)
 
 
 nicknamer.run(TOKEN)
