@@ -50,7 +50,7 @@ async def test_nick(bot):
     assert (
         dpytest.verify()
         .message()
-        .content(f"Changed {self_member}'s nickname from '{orig_nick}' to 'Mr. Poopy'")
+        .content(f"Changed {self_member}'s nickname from '{orig_nick}' to '{new_nick}'")
     )
 
 
