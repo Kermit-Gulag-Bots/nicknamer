@@ -28,7 +28,7 @@ nicknamer = Bot(command_prefix="!", intents=intents)
 
 @nicknamer.event
 async def on_ready() -> None:
-    await nicknamer.add_cog(Scutoid(nicknamer, REAL_NAMES))
+    await nicknamer.add_cog(Scutoid(REAL_NAMES))
 
 
 nicknamer.run(TOKEN)

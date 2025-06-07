@@ -4,7 +4,7 @@ import socket
 from typing import Dict, Tuple, List, Optional
 
 from discord import Role, Member, Forbidden, HTTPException, Message, Embed
-from discord.ext.commands import Cog, Context, command, Bot
+from discord.ext.commands import Cog, Context, command
 from unalix import clear_url
 from urlextract import URLExtract
 
@@ -23,8 +23,7 @@ HAPPY_JAR_JAR_PIC = "https://static.wikia.nocookie.net/unanything/images/c/c7/Ja
 
 class Scutoid(Cog):
 
-    def __init__(self, bot: Bot, real_names: Dict[int, str]) -> None:
-        self._bot = bot
+    def __init__(self, real_names: Dict[int, str]) -> None:
         self._real_names = real_names
 
     @staticmethod

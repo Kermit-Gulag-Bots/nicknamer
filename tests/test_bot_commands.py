@@ -25,7 +25,7 @@ async def bot():
 
     # noinspection PyProtectedMember
     await nicknamer._async_setup_hook()
-    await nicknamer.add_cog(Scutoid(nicknamer, REAL_NAMES))
+    await nicknamer.add_cog(Scutoid(REAL_NAMES))
 
     dpytest.configure(nicknamer)
 
