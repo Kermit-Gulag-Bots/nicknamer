@@ -118,8 +118,6 @@ class Scutoid(Cog):
             specific_member: One specific member of the guild whose name the user wants
                              to know
         """
-        context.guild.fetch_members()
-
         if specific_member:
             if specific_member.bot:
                 await context.reply(
