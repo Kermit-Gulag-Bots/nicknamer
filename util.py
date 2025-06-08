@@ -2,6 +2,8 @@ import sys
 from typing import Dict
 
 import yaml
+from discord import Role
+from discord.ext.commands import Context
 
 
 def read_yaml(filepath: str) -> Dict:
@@ -21,3 +23,14 @@ def read_yaml(filepath: str) -> Dict:
         except yaml.YAMLError as e:
             print(f"Failed to load real names config:\n{e}")
             sys.exit(1)
+
+
+def get_role_to_alert(context: Context, role_name: str) -> Role:
+    role_to_mention: Role = context.guild.default_role
+
+    for role in context.guild.roles:
+        if role.name == role_name:
+            role_to_mention = role
+            break
+
+    return role_to_mention

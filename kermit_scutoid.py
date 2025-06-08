@@ -1,15 +1,15 @@
 import asyncio
 import re
-import socket
-from typing import Dict, Tuple, List, Optional
+from typing import Dict
 
-from discord import Role, Member, Forbidden, HTTPException, Message, Embed
+from discord import Member, Forbidden, HTTPException, Message, Embed
 from discord.ext.commands import Cog, Context, command
 from unalix import clear_url
 from urlextract import URLExtract
 
-NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
-REVEAL_INSULT = "ya dingus"
+from identity_config import IdentityConfig
+from util import get_role_to_alert
+
 CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
 URL_LENGTH_VIOLATION_FACTOR = 2
 JAR_JAR_EMOJI_ID = 1061775549065855079
@@ -21,21 +21,13 @@ HORRIFIED_JAR_JAR_PIC = (
 HAPPY_JAR_JAR_PIC = "https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest"
 
 
-class Scutoid(Cog):
+class KermitScutoid(Cog):
 
-    def __init__(self, real_names: Dict[int, str]) -> None:
-        self._real_names = real_names
-
-    @staticmethod
-    def _get_role_to_alert(context: Context) -> Role:
-        role_to_mention: Role = context.guild.default_role
-
-        for role in context.guild.roles:
-            if role.name == CODE_MONKEYS_ROLE_NAME:
-                role_to_mention = role
-                break
-
-        return role_to_mention
+    def __init__(self, identity_config: Dict[int, IdentityConfig]):
+        self._server_identities = {
+            guild_id: config.reveal_config.identities
+            for guild_id, config in identity_config.items()
+        }
 
     @command()
     async def nick(
@@ -76,82 +68,14 @@ class Scutoid(Cog):
             else:
                 response = (
                     "Some devilry restricts my power, "
-                    f"{Scutoid._get_role_to_alert(context).mention} please "
-                    f"investigate the rogue {member.mention}:\n```{e}```"
+                    f"{get_role_to_alert(context, CODE_MONKEYS_ROLE_NAME).mention} "
+                    f"please investigate the rogue {member.mention}:\n```{e}```"
                 )
         except HTTPException as e:
             formatted_exception_text = e.text.replace("\n", "\n\t")
             response = f"You fool, you messed it up:\n\t{formatted_exception_text}"
 
         await context.reply(response)
-
-    def _process_channel_names(self, context: Context) -> Tuple[List[str], List[str]]:
-        name_explanations = []
-        unrecognized_names = []
-
-        for member in context.channel.members:
-            if not member.bot and member.id != context.guild.owner_id:
-                if member.id in self._real_names:
-                    name_explanations.append(
-                        NAME_EXPLANATION_TEMPLATE.format(
-                            display_name=member.display_name,
-                            real_name=self._real_names[member.id],
-                        )
-                    )
-                else:
-                    unrecognized_names.append(f"{member} aka {member.display_name}")
-
-        return name_explanations, unrecognized_names
-
-    @command()
-    async def reveal(self, context: Context, specific_member: Optional[Member]) -> None:
-        """Routing responsible for 'reveal' discord command.
-
-        This function handles the 'reveal' command for the `nicknamer` bot. Its purpose
-        is to display guild members' true names. When the command is entered in a
-        channel, it will show the real names of all users in that channel. A user can
-        also specify a particular member to reveal, in which case the bot will show the
-        real name of the member, even if they aren't in the same channel.
-
-        Args:
-            context: The discord `Context` from which the command was invoked
-            specific_member: One specific member of the guild whose name the user wants
-                             to know
-        """
-        if specific_member:
-            if specific_member.bot:
-                await context.reply(
-                    f"{specific_member.display_name} is a bot, {REVEAL_INSULT}!"
-                )
-            else:
-                await context.reply(
-                    NAME_EXPLANATION_TEMPLATE.format(
-                        display_name=specific_member.display_name,
-                        real_name=self._real_names[specific_member.id],
-                    )
-                )
-        else:
-            name_explanations, unrecognized_names = self._process_channel_names(
-                context
-            )
-
-            if name_explanations:
-                name_explanations_str = "\n\t".join(name_explanations)
-                await context.reply(
-                    f"Here are people's real names, {REVEAL_INSULT}:\n\t"
-                    f"{name_explanations_str}"
-                )
-
-            if unrecognized_names:
-                role_to_mention = Scutoid._get_role_to_alert(context)
-
-                unrecognized_names_str = "\n\t".join(unrecognized_names)
-
-                await context.send(
-                    f"Hey {role_to_mention.mention}, these members are "
-                    f"unrecognized:\n\t{unrecognized_names_str}\n\nOne of y'all should "
-                    "improve real name management and/or add them to the config."
-                )
 
     @command()
     async def trace(self, context: Context) -> None:
@@ -168,20 +92,10 @@ class Scutoid(Cog):
                 f"{context.message.reference.resolved.reference.jump_url}"
             )
 
-    @command()
-    async def ping(self, context: Context) -> None:
-        """Ping command to test bot availability
-
-        Any instance of bot connected to the server will respond with "Pong!" and some
-        runtime information.
-
-        Args:
-            context: The discord `Context` from which the command was invoked
-        """
-        await context.reply(f"`<{socket.gethostname()}>` Pong!")
-
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
+        identities = self._server_identities[message.guild.id]
+
         cleaned_urls = {}
 
         take_extreme_counter_measures = False
@@ -227,8 +141,8 @@ class Scutoid(Cog):
                 jar_jar_embed = Embed(
                     title="Jar Jar Link Countermeasures",
                     description=(
-                        f"Lookie Lookie {self._real_names[message.author.id]}! Meesa "
-                        "makee allllll cwean up! Muy muy."
+                        f"Lookie Lookie {identities[message.author.id]}! Meesa makee "
+                        "allllll cwean up! Muy muy."
                     ),
                     color=JAR_JAR_COLOR_HEX,
                 )
