@@ -19,6 +19,7 @@ HORRIFIED_JAR_JAR_PIC = (
     "https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp"
 )
 HAPPY_JAR_JAR_PIC = "https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest"
+DEV_CHANNEL_ID = 899424171744956417
 
 
 class Scutoid(Cog):
@@ -131,9 +132,7 @@ class Scutoid(Cog):
                     )
                 )
         else:
-            name_explanations, unrecognized_names = self._process_channel_names(
-                context
-            )
+            name_explanations, unrecognized_names = self._process_channel_names(context)
 
             if name_explanations:
                 name_explanations_str = "\n\t".join(name_explanations)
@@ -201,7 +200,10 @@ class Scutoid(Cog):
             jar_jar_emoji = await message.channel.guild.fetch_emoji(JAR_JAR_EMOJI_ID)
             await message.add_reaction(jar_jar_emoji)
 
-            if message.author.id == ZACH_USER_ID:
+            if (
+                message.author.id == ZACH_USER_ID
+                or message.channel.id == DEV_CHANNEL_ID
+            ):
                 await asyncio.sleep(0.2)
 
                 jar_jar_embed = Embed(
