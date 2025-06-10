@@ -14,6 +14,9 @@ class IdentityScutoid(Cog):
     def __init__(self, identity_config: Dict[int, IdentityConfig]) -> None:
         self._identity_config = identity_config
 
+    def cog_check(self, context: Context) -> bool:
+        return context.guild.id in self._identity_config
+
     @staticmethod
     def _process_channel_names(
         context: Context, identities: Dict[int, str]

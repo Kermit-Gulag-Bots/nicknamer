@@ -19,6 +19,7 @@ HORRIFIED_JAR_JAR_PIC = (
     "https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp"
 )
 HAPPY_JAR_JAR_PIC = "https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest"
+KERMIT_GUILD_ID = 894677677468954757
 
 
 class KermitScutoid(Cog):
@@ -28,6 +29,9 @@ class KermitScutoid(Cog):
             guild_id: config.reveal_config.identities
             for guild_id, config in identity_config.items()
         }
+
+    def cog_check(self, context: Context) -> bool:
+        return context.guild.id == KERMIT_GUILD_ID
 
     @command()
     async def nick(
