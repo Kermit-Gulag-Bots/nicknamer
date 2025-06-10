@@ -20,6 +20,7 @@ HORRIFIED_JAR_JAR_PIC = (
 )
 HAPPY_JAR_JAR_PIC = "https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest"
 KERMIT_GUILD_ID = 894677677468954757
+DEV_CHANNEL_ID = 899424171744956417
 
 
 class KermitScutoid(Cog):
@@ -119,7 +120,10 @@ class KermitScutoid(Cog):
             jar_jar_emoji = await message.channel.guild.fetch_emoji(JAR_JAR_EMOJI_ID)
             await message.add_reaction(jar_jar_emoji)
 
-            if message.author.id == ZACH_USER_ID:
+            if (
+                message.author.id == ZACH_USER_ID
+                or message.channel.id == DEV_CHANNEL_ID
+            ):
                 await asyncio.sleep(0.2)
 
                 jar_jar_embed = Embed(
