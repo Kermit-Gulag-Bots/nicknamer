@@ -9,6 +9,6 @@ COPY poetry.lock pyproject.toml /app/
 RUN poetry install -n --no-root --only main
 
 COPY *.py /app/
-COPY real_names.yaml /app/
+COPY data/* /app/
 
-ENTRYPOINT poetry run python nicknamer.py
+ENTRYPOINT exec poetry run python levi.py
