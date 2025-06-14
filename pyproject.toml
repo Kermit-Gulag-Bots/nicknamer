@@ -1,6 +1,6 @@
 [project]
 name = "nicknamer"
-version = "2.0.0"
+version = "2.1.0"
 description = "Bot to facilitate nickname information management and viewing"
 authors = [
     {name = "Andrew Cook", email = "acmagee@gmail.com"},
