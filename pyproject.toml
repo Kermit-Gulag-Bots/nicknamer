@@ -13,7 +13,8 @@ dependencies = [
     "PyYAML (>=6.0,<7.0)",
     "unalix (>=0.9,<1.0)",
     "urlextract (>=1.8,<2.0)",
-    "dacite (>=1.9,<2.0)"
+    "dacite (>=1.9,<2.0)",
+    "requests (>=2.32.4,<3.0.0)"
 ]
 
 [build-system]

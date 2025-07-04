@@ -6,10 +6,9 @@ from typing import Dict, Optional
 class RevealConfig:
     insult: str
     role_to_complain_to: str
-    identities: Dict[int, str]
 
 
 @dataclass
 class ServerConfig:
-    reveal_config: RevealConfig
+    reveal_config: Optional[RevealConfig]
     kermit_config: Optional[Dict]

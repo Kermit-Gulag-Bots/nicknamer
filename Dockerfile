@@ -2,6 +2,7 @@ FROM python:3.12.3-slim
 
 RUN mkdir /app
 WORKDIR /app
+RUN mkdir /app/data
 
 RUN pip install poetry
 

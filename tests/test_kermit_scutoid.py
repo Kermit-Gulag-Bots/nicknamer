@@ -8,7 +8,7 @@ from dacite import from_dict
 from discord import Guild
 from discord.ext import commands
 
-from identity_config import ServerConfig
+from server_config_types import ServerConfig
 from kermit_scutoid import KermitScutoid
 
 TEST_GUILD_NAME = "test guild"
