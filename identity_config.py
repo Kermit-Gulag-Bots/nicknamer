@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 
 
 @dataclass
@@ -10,5 +10,6 @@ class RevealConfig:
 
 
 @dataclass
-class IdentityConfig:
+class ServerConfig:
     reveal_config: RevealConfig
+    kermit_config: Optional[Dict]

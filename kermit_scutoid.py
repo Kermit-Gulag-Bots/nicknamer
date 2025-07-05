@@ -7,7 +7,7 @@ from discord.ext.commands import Cog, Context, command
 from unalix import clear_url
 from urlextract import URLExtract
 
-from identity_config import IdentityConfig
+from identity_config import ServerConfig
 from util import get_role_to_alert
 
 CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
@@ -19,20 +19,19 @@ HORRIFIED_JAR_JAR_PIC = (
     "https://cdn.mos.cms.futurecdn.net/RvLDChLaR37NWTEjvQm2pB-970-80.jpg.webp"
 )
 HAPPY_JAR_JAR_PIC = "https://static.wikia.nocookie.net/unanything/images/c/c7/Jar_Jar.jpg/revision/latest"
-KERMIT_GUILD_ID = 894677677468954757
 DEV_CHANNEL_ID = 899424171744956417
 
 
 class KermitScutoid(Cog):
 
-    def __init__(self, identity_config: Dict[int, IdentityConfig]):
+    def __init__(self, server_config: Dict[int, ServerConfig]):
         self._server_identities = {
             guild_id: config.reveal_config.identities
-            for guild_id, config in identity_config.items()
+            for guild_id, config in server_config.items() if config.kermit_config
         }
 
     def cog_check(self, context: Context) -> bool:
-        return context.guild.id == KERMIT_GUILD_ID
+        return context.guild.id in self._server_identities
 
     @command()
     async def nick(

@@ -3,7 +3,7 @@ from typing import Tuple, List, Dict, Optional
 from discord import Member
 from discord.ext.commands import Cog, Context, command
 
-from identity_config import IdentityConfig
+from identity_config import ServerConfig
 from util import get_role_to_alert
 
 NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
@@ -11,8 +11,12 @@ NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
 
 class IdentityScutoid(Cog):
 
-    def __init__(self, identity_config: Dict[int, IdentityConfig]) -> None:
-        self._identity_config = identity_config
+    def __init__(self, server_config: Dict[int, ServerConfig]) -> None:
+        self._identity_config = {
+            guild_id: config.reveal_config
+            for guild_id, config in server_config.items()
+            if config.reveal_config
+        }
 
     def cog_check(self, context: Context) -> bool:
         return context.guild.id in self._identity_config
@@ -53,7 +57,7 @@ class IdentityScutoid(Cog):
             specific_member: One specific member of the guild whose name the user wants
                              to know
         """
-        reveal_config = self._identity_config[context.guild.id].reveal_config
+        reveal_config = self._identity_config[context.guild.id]
 
         if specific_member:
             if specific_member.bot:

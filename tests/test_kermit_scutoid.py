@@ -1,29 +1,38 @@
-import os
+from typing import Optional
 
 import discord
 import discord.ext.test as dpytest
 import pytest
 import pytest_asyncio
 from dacite import from_dict
+from discord import Guild
 from discord.ext import commands
 
-from identity_config import IdentityConfig
+from identity_config import ServerConfig
 from kermit_scutoid import KermitScutoid
-from util import read_yaml
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+TEST_GUILD_NAME = "test guild"
+TEST_MEMBER_NAME = "DeathKitty2000"
 
 # noinspection PyTypeChecker
-IDENTITY_SERVER_CONFIGS = {
-    894677677468954757: from_dict(
-        data_class=IdentityConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "../kermit_config.yaml")),
-    ),
-    1380944481850757191: from_dict(
-        data_class=IdentityConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "../gay_str8_alliance_config.yaml")),
-    ),
-}
+TEST_SERVER_CONFIG = from_dict(
+    data_class=ServerConfig,
+    data={
+        "reveal_config": {
+            "insult": "test insult",
+            "role_to_complain_to": "test_role",
+            "identities": {456: "Amos"},
+        }
+    },
+)
+
+
+def get_guild(bot: commands.Bot, guild_name: str) -> Optional[Guild]:
+    for guild in bot.guilds:
+        if guild.name == guild_name:
+            return guild
+
+    return None
 
 
 @pytest_asyncio.fixture
@@ -36,9 +45,21 @@ async def bot():
 
     # noinspection PyProtectedMember
     await nicknamer._async_setup_hook()
-    await nicknamer.add_cog(KermitScutoid(IDENTITY_SERVER_CONFIGS))
 
-    dpytest.configure(nicknamer)
+    dpytest.configure(
+        nicknamer,
+        guilds=[
+            TEST_GUILD_NAME,
+        ],
+        members=[TEST_MEMBER_NAME]
+    )
+
+    guild = get_guild(nicknamer, TEST_GUILD_NAME)
+
+    if not guild:
+        raise RuntimeError("improperly configured")
+
+    await nicknamer.add_cog(KermitScutoid({guild.id: TEST_SERVER_CONFIG}))
 
     yield nicknamer
 
@@ -46,20 +67,31 @@ async def bot():
     await dpytest.empty_queue()  # empty the global message queue as test teardown
 
 
+@pytest_asyncio.fixture
+async def guild(bot):
+    yield get_guild(bot, TEST_GUILD_NAME)
+
+
+@pytest_asyncio.fixture
+async def member(guild: Guild):
+    for member in guild.members:
+        if member.name == TEST_MEMBER_NAME:
+            yield member
+
+
 @pytest.mark.asyncio
-async def test_nick(bot):
+async def test_nick(bot, member):
     # GIVEN
-    self_member = bot.guilds[0].me
-    orig_nick = self_member.nick
+    orig_nick = member.nick
     new_nick = "Mr. Poopy"
 
     # WHEN
-    await dpytest.message(f"!nick {self_member.mention} {new_nick}")
+    await dpytest.message(f"!nick {member.mention} {new_nick}")
 
     # THEN
-    assert self_member.nick == new_nick
+    assert member.nick == new_nick
     assert (
         dpytest.verify()
         .message()
-        .content(f"Changed {self_member}'s nickname from '{orig_nick}' to '{new_nick}'")
+        .content(f"Changed {member}'s nickname from '{orig_nick}' to '{new_nick}'")
     )
