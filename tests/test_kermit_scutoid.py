@@ -22,7 +22,8 @@ TEST_SERVER_CONFIG = from_dict(
             "insult": "test insult",
             "role_to_complain_to": "test_role",
             "identities": {456: "Amos"},
-        }
+        },
+        "kermit_config": {}
     },
 )
 
