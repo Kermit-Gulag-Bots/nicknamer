@@ -27,7 +27,7 @@ class KermitScutoid(Cog):
     def __init__(self, server_config: Dict[int, ServerConfig]):
         self._server_identities = {
             guild_id: config.reveal_config.identities
-            for guild_id, config in server_config.items() if config.kermit_config
+            for guild_id, config in server_config.items() if config.kermit_config is not None
         }
 
     def cog_check(self, context: Context) -> bool:
