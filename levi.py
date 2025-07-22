@@ -14,6 +14,7 @@ from kermit_scutoid import KermitScutoid
 from util import read_yaml
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_DIR = os.path.join(ROOT_DIR, "data")
 KERMIT_GUILD_ID = 894677677468954757
 GAY_STR8_ALLIANCE_GUILD_ID = 1380944481850757191
 
@@ -21,11 +22,11 @@ GAY_STR8_ALLIANCE_GUILD_ID = 1380944481850757191
 SERVER_CONFIGS = {
     KERMIT_GUILD_ID: from_dict(
         data_class=ServerConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "kermit_config.yaml")),
+        data=read_yaml(os.path.join(CONFIG_DIR, "kermit_config.yaml")),
     ),
     GAY_STR8_ALLIANCE_GUILD_ID: from_dict(
         data_class=ServerConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "gay_str8_alliance_config.yaml")),
+        data=read_yaml(os.path.join(CONFIG_DIR, "gay_str8_alliance_config.yaml")),
     ),
 }
 
