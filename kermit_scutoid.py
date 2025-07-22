@@ -98,6 +98,9 @@ class KermitScutoid(Cog):
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
+        if not message.guild.id in self._server_identities:
+            return
+
         identities = self._server_identities[message.guild.id]
 
         cleaned_urls = {}
