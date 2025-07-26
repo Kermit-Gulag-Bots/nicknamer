@@ -8,24 +8,25 @@ from discord import Intents
 from discord.ext.commands import Bot
 
 from base_scutoid import BaseScutoid
-from identity_config import IdentityConfig
+from identity_config import ServerConfig
 from identity_scutoid import IdentityScutoid
 from kermit_scutoid import KermitScutoid
 from util import read_yaml
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_DIR = os.path.join(ROOT_DIR, "data")
 KERMIT_GUILD_ID = 894677677468954757
 GAY_STR8_ALLIANCE_GUILD_ID = 1380944481850757191
 
 # noinspection PyTypeChecker
-IDENTITY_SERVER_CONFIGS = {
+SERVER_CONFIGS = {
     KERMIT_GUILD_ID: from_dict(
-        data_class=IdentityConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "kermit_config.yaml")),
+        data_class=ServerConfig,
+        data=read_yaml(os.path.join(CONFIG_DIR, "kermit_config.yaml")),
     ),
     GAY_STR8_ALLIANCE_GUILD_ID: from_dict(
-        data_class=IdentityConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "gay_str8_alliance_config.yaml")),
+        data_class=ServerConfig,
+        data=read_yaml(os.path.join(CONFIG_DIR, "gay_str8_alliance_config.yaml")),
     ),
 }
 
@@ -45,8 +46,8 @@ levi = Bot(command_prefix="!", intents=intents)
 @levi.event
 async def on_ready() -> None:
     await levi.add_cog(BaseScutoid())
-    await levi.add_cog(IdentityScutoid(IDENTITY_SERVER_CONFIGS))
-    await levi.add_cog(KermitScutoid(IDENTITY_SERVER_CONFIGS))
+    await levi.add_cog(IdentityScutoid(SERVER_CONFIGS))
+    await levi.add_cog(KermitScutoid(SERVER_CONFIGS))
 
 
 levi.run(TOKEN)
