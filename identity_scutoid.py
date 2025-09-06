@@ -15,7 +15,11 @@ class IdentityScutoid(Cog):
     def __init__(
         self, server_config: Dict[int, ServerConfig], urchin_client: UrchinClient
     ) -> None:
-        self._reveal_config = {guild_id: config.reveal_config for guild_id, config in server_config.items() if config.reveal_config}
+        self._reveal_config = {
+            guild_id: config.reveal_config
+            for guild_id, config in server_config.items()
+            if config.reveal_config
+        }
         self._urchin_client = urchin_client
 
     def cog_check(self, context: Context) -> bool:
@@ -68,7 +72,9 @@ class IdentityScutoid(Cog):
                 try:
                     response = NAME_EXPLANATION_TEMPLATE.format(
                         display_name=specific_member.display_name,
-                        real_name=self._urchin_client.get_name(context.guild.id, specific_member.id),
+                        real_name=self._urchin_client.get_name(
+                            context.guild.id, specific_member.id
+                        ),
                     )
                 except Exception as e:
                     response = f"ERROR!! {str(e)}"

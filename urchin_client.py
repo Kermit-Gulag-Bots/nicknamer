@@ -8,6 +8,7 @@ NAMES_ENDPOINT = f"{ENDPOINT_BASE_URL}/api/v1/names"
 
 Identities = Dict[int, str]
 
+
 class UrchinClient:
     def __init__(self, username: str, password: str) -> None:
         self._credentials = {"username": username, "password": password}

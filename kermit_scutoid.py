@@ -153,7 +153,9 @@ class KermitScutoid(Cog):
 
                 # noinspection PyBroadException
                 try:
-                    name = self._urchin_client.get_name(message.guild.id, message.author.id)
+                    name = self._urchin_client.get_name(
+                        message.guild.id, message.author.id
+                    )
                 except Exception:
                     name = message.author.display_name
 

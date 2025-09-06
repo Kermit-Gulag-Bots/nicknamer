@@ -31,6 +31,7 @@ SERVER_CONFIGS = {
     ),
 }
 
+
 def required_env_var(var_name: str):
     var = os.getenv(var_name)
     if not var:
@@ -38,6 +39,7 @@ def required_env_var(var_name: str):
         sys.exit(1)
 
     return var
+
 
 TOKEN = required_env_var("DISCORD_TOKEN")
 URCHIN_USERNAME = required_env_var("URCHIN_USERNAME")
@@ -47,6 +49,7 @@ intents: Intents = Intents.all()
 levi = Bot(command_prefix="!", intents=intents)
 
 urchin_client = UrchinClient(URCHIN_USERNAME, URCHIN_PASSWORD)
+
 
 @levi.event
 async def on_ready() -> None:
