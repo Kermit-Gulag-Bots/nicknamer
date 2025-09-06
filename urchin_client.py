@@ -13,7 +13,7 @@ class UrchinClient:
         self._credentials = {"username": username, "password": password}
 
         self._token: Optional[str] = None
-        self._identities: Optional[Identities] = None
+        self._server_identities: Dict[int, Identities] = dict()
 
     def _get_token(self) -> str:
         if not self._token:
@@ -27,7 +27,7 @@ class UrchinClient:
         return self._token
 
     def get_names(self, guild_id: int) -> Identities:
-        if not self._identities:
+        if guild_id not in self._server_identities:
             token = self._get_token()
 
             resp = requests.get(
@@ -39,11 +39,11 @@ class UrchinClient:
             if resp.status_code != requests.codes.ok:
                 resp.raise_for_status()
 
-            self._identities = {
+            self._server_identities[guild_id] = {
                 info["discord_id"]: info["name"] for info in resp.json()["names"]
             }
 
-        return self._identities
+        return self._server_identities[guild_id]
 
     def get_name(self, guild_id: int, discord_id: int) -> str:
         return self.get_names(guild_id)[discord_id]
