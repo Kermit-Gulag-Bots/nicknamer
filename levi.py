@@ -23,11 +23,11 @@ GAY_STR8_ALLIANCE_GUILD_ID = 1380944481850757191
 SERVER_CONFIGS = {
     KERMIT_GUILD_ID: from_dict(
         data_class=ServerConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "data/kermit_config.yaml")),
+        data=read_yaml(os.path.join(CONFIG_DIR, "kermit_config.yaml")),
     ),
     GAY_STR8_ALLIANCE_GUILD_ID: from_dict(
         data_class=ServerConfig,
-        data=read_yaml(os.path.join(ROOT_DIR, "data/gay_str8_alliance_config.yaml")),
+        data=read_yaml(os.path.join(CONFIG_DIR, "gay_str8_alliance_config.yaml")),
     ),
 }
 

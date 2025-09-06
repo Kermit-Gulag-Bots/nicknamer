@@ -68,15 +68,15 @@ class IdentityScutoid(Cog):
                 try:
                     response = NAME_EXPLANATION_TEMPLATE.format(
                         display_name=specific_member.display_name,
-                        real_name=self._urchin_client.get_name(specific_member.id),
+                        real_name=self._urchin_client.get_name(context.guild.id, specific_member.id),
                     )
                 except Exception as e:
-                    response = str(e)
+                    response = f"ERROR!! {str(e)}"
 
                 await context.reply(response)
         else:
             try:
-                names = self._urchin_client.get_names()
+                names = self._urchin_client.get_names(context.guild.id)
             except Exception as e:
                 await context.reply(str(e))
                 return

@@ -31,12 +31,12 @@ class KermitScutoid(Cog):
         self._servers = {
             guild_id
             for guild_id, config in server_config.items()
-            if config.kermit_config
+            if config.kermit_config is not None
         }
         self._urchin_client = urchin_client
 
     def cog_check(self, context: Context) -> bool:
-        return context.guild.id in self._server_identities
+        return context.guild.id in self._servers
 
     @command()
     async def nick(
@@ -103,7 +103,7 @@ class KermitScutoid(Cog):
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
-        if message.guild.id not in self._server_identities:
+        if message.guild.id not in self._servers:
             return
 
         cleaned_urls = {}
@@ -153,7 +153,7 @@ class KermitScutoid(Cog):
 
                 # noinspection PyBroadException
                 try:
-                    name = self._urchin_client.get_name(message.author.id)
+                    name = self._urchin_client.get_name(message.guild.id, message.author.id)
                 except Exception:
                     name = message.author.display_name
 

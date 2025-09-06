@@ -26,12 +26,14 @@ class UrchinClient:
 
         return self._token
 
-    def get_names(self) -> Identities:
+    def get_names(self, guild_id: int) -> Identities:
         if not self._identities:
             token = self._get_token()
 
             resp = requests.get(
-                NAMES_ENDPOINT, headers={"authorization": f"Bearer {token}"}
+                NAMES_ENDPOINT,
+                headers={"authorization": f"Bearer {token}"},
+                params={"server_id": str(guild_id)},
             )
 
             if resp.status_code != requests.codes.ok:
@@ -43,5 +45,5 @@ class UrchinClient:
 
         return self._identities
 
-    def get_name(self, discord_id: int) -> str:
-        return self.get_names()[discord_id]
+    def get_name(self, guild_id: int, discord_id: int) -> str:
+        return self.get_names(guild_id)[discord_id]
