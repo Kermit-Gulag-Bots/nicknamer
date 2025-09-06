@@ -14,7 +14,7 @@ class UrchinClient:
         self._credentials = {"username": username, "password": password}
 
         self._token: Optional[str] = None
-        self._server_identities: Dict[int, Identities] = dict()
+        self._server_identities: Dict[int, Identities] = {}
 
     def _get_token(self) -> str:
         if not self._token:
