@@ -151,7 +151,6 @@ class KermitScutoid(Cog):
                     pattern, lambda m: cleaned_urls[m.group(0)], message.content
                 )
 
-                # noinspection PyBroadException
                 try:
                     name = self._urchin_client.get_name(
                         message.guild.id, message.author.id
