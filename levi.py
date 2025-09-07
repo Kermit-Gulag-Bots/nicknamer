@@ -33,8 +33,7 @@ SERVER_CONFIGS = {
 
 
 def required_env_var(var_name: str):
-    var = os.getenv(var_name)
-    if not var:
+    if not (var := os.getenv(var_name)):
         print(f"Required secret not provided: {var_name}")
         sys.exit(1)
 
