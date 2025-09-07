@@ -156,7 +156,7 @@ class KermitScutoid(Cog):
                     name = self._urchin_client.get_name(
                         message.guild.id, message.author.id
                     )
-                except Exception:
+                except KeyError:
                     name = message.author.display_name
 
                 jar_jar_embed = Embed(
