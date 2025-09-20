@@ -41,13 +41,14 @@ def required_env_var(var_name: str):
 
 
 TOKEN = required_env_var("DISCORD_TOKEN")
+URCHIN_BASE_URL = required_env_var("URCHIN_BASE_URL")
 URCHIN_USERNAME = required_env_var("URCHIN_USERNAME")
 URCHIN_PASSWORD = required_env_var("URCHIN_PASSWORD")
 
 intents: Intents = Intents.all()
 levi = Bot(command_prefix="!", intents=intents)
 
-urchin_client = UrchinClient(URCHIN_USERNAME, URCHIN_PASSWORD)
+urchin_client = UrchinClient(URCHIN_BASE_URL, URCHIN_USERNAME, URCHIN_PASSWORD)
 
 
 @levi.event

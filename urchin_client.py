@@ -3,15 +3,17 @@ from typing import Dict, Optional
 import requests
 from requests import Response
 
-ENDPOINT_BASE_URL = "https://nicknamer-server-production.up.railway.app"
-LOGIN_ENDPOINT = f"{ENDPOINT_BASE_URL}/api/v1/login"
-NAMES_ENDPOINT = f"{ENDPOINT_BASE_URL}/api/v1/names"
+LOGIN_ENDPOINT_TEMPLATE = "{}/api/v1/login"
+NAMES_ENDPOINT_TEMPLATE = "{}/api/v1/names"
 
 Identities = Dict[int, str]
 
 
 class UrchinClient:
-    def __init__(self, username: str, password: str) -> None:
+    def __init__(self, base_url: str, username: str, password: str) -> None:
+        self._login_endpoint = LOGIN_ENDPOINT_TEMPLATE.format(base_url)
+        self._names_endpoint = NAMES_ENDPOINT_TEMPLATE.format(base_url)
+
         self._credentials = {"username": username, "password": password}
 
         self._token: Optional[str] = None
@@ -19,7 +21,7 @@ class UrchinClient:
 
     def _get_token(self) -> str:
         if not self._token:
-            resp = requests.post(LOGIN_ENDPOINT, json=self._credentials)
+            resp = requests.post(self._login_endpoint, json=self._credentials)
 
             if resp.status_code != requests.codes.ok:
                 resp.raise_for_status()
@@ -32,7 +34,7 @@ class UrchinClient:
         token = self._get_token()
 
         return requests.get(
-            NAMES_ENDPOINT,
+            self._names_endpoint,
             headers={"authorization": f"Bearer {token}"},
             params={"server_id": str(guild_id)},
         )
