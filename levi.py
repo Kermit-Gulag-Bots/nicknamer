@@ -8,9 +8,10 @@ from discord import Intents
 from discord.ext.commands import Bot
 
 from base_scutoid import BaseScutoid
-from identity_config import ServerConfig
+from server_config_types import ServerConfig
 from identity_scutoid import IdentityScutoid
 from kermit_scutoid import KermitScutoid
+from urchin_client import UrchinClient
 from util import read_yaml
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,24 +31,31 @@ SERVER_CONFIGS = {
     ),
 }
 
-TOKEN = os.getenv("DISCORD_TOKEN")
 
-if not TOKEN:
-    print(
-        "Error, no discord token provided, please set environment variable named"
-        "'DISCORD_TOKEN'"
-    )
-    sys.exit(1)
+def required_env_var(var_name: str):
+    if not (var := os.getenv(var_name)):
+        print(f"Required secret not provided: {var_name}")
+        sys.exit(1)
+
+    return var
+
+
+TOKEN = required_env_var("DISCORD_TOKEN")
+URCHIN_BASE_URL = required_env_var("URCHIN_BASE_URL")
+URCHIN_USERNAME = required_env_var("URCHIN_USERNAME")
+URCHIN_PASSWORD = required_env_var("URCHIN_PASSWORD")
 
 intents: Intents = Intents.all()
 levi = Bot(command_prefix="!", intents=intents)
+
+urchin_client = UrchinClient(URCHIN_BASE_URL, URCHIN_USERNAME, URCHIN_PASSWORD)
 
 
 @levi.event
 async def on_ready() -> None:
     await levi.add_cog(BaseScutoid())
-    await levi.add_cog(IdentityScutoid(SERVER_CONFIGS))
-    await levi.add_cog(KermitScutoid(SERVER_CONFIGS))
+    await levi.add_cog(IdentityScutoid(SERVER_CONFIGS, urchin_client))
+    await levi.add_cog(KermitScutoid(SERVER_CONFIGS, urchin_client))
 
 
 levi.run(TOKEN)

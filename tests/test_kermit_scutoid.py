@@ -1,4 +1,5 @@
 from typing import Optional
+from unittest.mock import Mock
 
 import discord
 import discord.ext.test as dpytest
@@ -8,7 +9,7 @@ from dacite import from_dict
 from discord import Guild
 from discord.ext import commands
 
-from identity_config import ServerConfig
+from server_config_types import ServerConfig
 from kermit_scutoid import KermitScutoid
 
 TEST_GUILD_NAME = "test guild"
@@ -23,7 +24,7 @@ TEST_SERVER_CONFIG = from_dict(
             "role_to_complain_to": "test_role",
             "identities": {456: "Amos"},
         },
-        "kermit_config": {}
+        "kermit_config": {},
     },
 )
 
@@ -52,7 +53,7 @@ async def bot():
         guilds=[
             TEST_GUILD_NAME,
         ],
-        members=[TEST_MEMBER_NAME]
+        members=[TEST_MEMBER_NAME],
     )
 
     guild = get_guild(nicknamer, TEST_GUILD_NAME)
@@ -60,7 +61,13 @@ async def bot():
     if not guild:
         raise RuntimeError("improperly configured")
 
-    await nicknamer.add_cog(KermitScutoid({guild.id: TEST_SERVER_CONFIG}))
+    # This should be a fixture if we have tests which hit the client, but this is okay
+    # for now
+    mock_urchin_client = Mock()
+
+    await nicknamer.add_cog(
+        KermitScutoid({guild.id: TEST_SERVER_CONFIG}, mock_urchin_client)
+    )
 
     yield nicknamer
 

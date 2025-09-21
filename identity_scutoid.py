@@ -3,7 +3,8 @@ from typing import Tuple, List, Dict, Optional
 from discord import Member
 from discord.ext.commands import Cog, Context, command
 
-from identity_config import ServerConfig
+from server_config_types import ServerConfig
+from urchin_client import UrchinClient
 from util import get_role_to_alert
 
 NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
@@ -11,15 +12,18 @@ NAME_EXPLANATION_TEMPLATE = "'{display_name}' is {real_name}"
 
 class IdentityScutoid(Cog):
 
-    def __init__(self, server_config: Dict[int, ServerConfig]) -> None:
-        self._identity_config = {
+    def __init__(
+        self, server_config: Dict[int, ServerConfig], urchin_client: UrchinClient
+    ) -> None:
+        self._reveal_config = {
             guild_id: config.reveal_config
             for guild_id, config in server_config.items()
             if config.reveal_config
         }
+        self._urchin_client = urchin_client
 
     def cog_check(self, context: Context) -> bool:
-        return context.guild.id in self._identity_config
+        return context.guild.id in self._reveal_config
 
     @staticmethod
     def _process_channel_names(
@@ -57,7 +61,7 @@ class IdentityScutoid(Cog):
             specific_member: One specific member of the guild whose name the user wants
                              to know
         """
-        reveal_config = self._identity_config[context.guild.id]
+        reveal_config = self._reveal_config[context.guild.id]
 
         if specific_member:
             if specific_member.bot:
@@ -65,15 +69,26 @@ class IdentityScutoid(Cog):
                     f"{specific_member.display_name} is a bot, {reveal_config.insult}!"
                 )
             else:
-                await context.reply(
-                    NAME_EXPLANATION_TEMPLATE.format(
+                try:
+                    response = NAME_EXPLANATION_TEMPLATE.format(
                         display_name=specific_member.display_name,
-                        real_name=reveal_config.identities[specific_member.id],
+                        real_name=self._urchin_client.get_name(
+                            context.guild.id, specific_member.id
+                        ),
                     )
-                )
+                except Exception as e:
+                    response = f"ERROR!! {str(e)}"
+
+                await context.reply(response)
         else:
+            try:
+                names = self._urchin_client.get_names(context.guild.id)
+            except Exception as e:
+                await context.reply(str(e))
+                return
+
             name_explanations, unrecognized_names = self._process_channel_names(
-                context, reveal_config.identities
+                context, names
             )
 
             if name_explanations:

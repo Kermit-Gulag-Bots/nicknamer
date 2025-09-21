@@ -7,7 +7,8 @@ from discord.ext.commands import Cog, Context, command
 from unalix import clear_url
 from urlextract import URLExtract
 
-from identity_config import ServerConfig
+from server_config_types import ServerConfig
+from urchin_client import UrchinClient
 from util import get_role_to_alert
 
 CODE_MONKEYS_ROLE_NAME = "Code Monkeys"
@@ -24,14 +25,18 @@ DEV_CHANNEL_ID = 899424171744956417
 
 class KermitScutoid(Cog):
 
-    def __init__(self, server_config: Dict[int, ServerConfig]):
-        self._server_identities = {
-            guild_id: config.reveal_config.identities
-            for guild_id, config in server_config.items() if config.kermit_config is not None
+    def __init__(
+        self, server_config: Dict[int, ServerConfig], urchin_client: UrchinClient
+    ):
+        self._servers = {
+            guild_id
+            for guild_id, config in server_config.items()
+            if config.kermit_config is not None
         }
+        self._urchin_client = urchin_client
 
     def cog_check(self, context: Context) -> bool:
-        return context.guild.id in self._server_identities
+        return context.guild.id in self._servers
 
     @command()
     async def nick(
@@ -98,10 +103,8 @@ class KermitScutoid(Cog):
 
     @Cog.listener()
     async def on_message(self, message: Message) -> None:
-        if message.guild.id not in self._server_identities:
+        if message.guild.id not in self._servers:
             return
-
-        identities = self._server_identities[message.guild.id]
 
         cleaned_urls = {}
 
@@ -148,10 +151,17 @@ class KermitScutoid(Cog):
                     pattern, lambda m: cleaned_urls[m.group(0)], message.content
                 )
 
+                try:
+                    name = self._urchin_client.get_name(
+                        message.guild.id, message.author.id
+                    )
+                except KeyError:
+                    name = message.author.display_name
+
                 jar_jar_embed = Embed(
                     title="Jar Jar Link Countermeasures",
                     description=(
-                        f"Lookie Lookie {identities[message.author.id]}! Meesa makee "
+                        f"Lookie Lookie {name}! Meesa makee "
                         "allllll cwean up! Muy muy."
                     ),
                     color=JAR_JAR_COLOR_HEX,
